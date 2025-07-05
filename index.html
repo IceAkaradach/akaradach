@@ -370,7 +370,7 @@
 
         // ** IMPORTANT: REPLACE THIS WITH YOUR GENERATED GEMINI API KEY **
         // ** สำคัญ: แทนที่ข้อความนี้ด้วย Gemini API Key ที่คุณสร้างขึ้นมา **
-        const GEMINI_API_KEY = 'AIzaSyDWTdhM4j2rv0Yp54EvuRCFk71MQ1VZfyI'; // <-- API Key ของคุณ
+        const GEMINI_API_KEY = 'AIzaSyDWTdhM4j2rv0Yp54EvuRCFk71MQ1VZfyI';
 
         // Function to show the custom modal
         function showModal(title, message) {
@@ -541,7 +541,7 @@
                 const result = await response.json();
                 console.log('Gemini API Result (parsed JSON):', result); // Log parsed JSON result
 
-                if (result.candidates && result.candidates.length > 0 &&
+                if (response.ok && result.candidates && result.candidates.length > 0 &&
                     result.candidates[0].content && result.candidates[0].content.parts &&
                     result.candidates[0].content.parts.length > 0) {
                     const jsonString = result.candidates[0].content.parts[0].text;
