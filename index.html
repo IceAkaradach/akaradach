@@ -441,16 +441,25 @@
             try {
                 const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors', // Required for Google Apps Script web app
+                    // Removed mode: 'no-cors' to allow proper data transmission and response reading
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(formData),
                 });
 
-                // Since mode is 'no-cors', we can't check response.ok or response.json() directly.
-                // We assume success if no network error occurred.
-                showModal('ส่งข้อมูลสำเร็จ!', 'ข้อมูลถูกส่งไปยัง Google Sheet แล้ว');
+                // Now we can check response.ok and response.json()
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.result === 'success') {
+                        showModal('ส่งข้อมูลสำเร็จ!', 'ข้อมูลถูกส่งไปยัง Google Sheet แล้ว');
+                    } else {
+                        showModal('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการส่งข้อมูลไปยัง Google Sheet: ' + (result.message || 'Unknown error.'));
+                    }
+                } else {
+                    console.error('Failed to send data to Google Sheet:', response.status, response.statusText);
+                    showModal('ข้อผิดพลาด', `เกิดข้อผิดพลาดในการส่งข้อมูลไปยัง Google Sheet: ${response.status} ${response.statusText}`);
+                }
             } catch (error) {
                 console.error('Error sending data to Google Sheet:', error);
                 showModal('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการส่งข้อมูลไปยัง Google Sheet: ' + error.message);
@@ -634,7 +643,6 @@
             }
 
             // Construct the URL for the Apps Script doGet endpoint
-            // This URL will be the same as GOOGLE_APPS_SCRIPT_URL but will use GET method
             let fetchUrl = GOOGLE_APPS_SCRIPT_URL;
             let params = new URLSearchParams();
             if (productName) {
