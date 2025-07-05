@@ -657,12 +657,12 @@
             }
 
             try {
-                // Google Apps Script Web Apps handle CORS automatically for GET requests.
+                // Removed Content-Type header for GET request to avoid CORS preflight issues
                 const response = await fetch(fetchUrl, {
                     method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    // headers: { // Removed headers for GET
+                    //     'Content-Type': 'application/json',
+                    // },
                 });
 
                 if (!response.ok) {
