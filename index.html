@@ -368,6 +368,10 @@
         // ** สำคัญ: นี่คือ URL ของ Google Apps Script Web App ที่คุณได้ปรับใช้ (ต้องลงท้ายด้วย /exec) **
         const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwE7AfEh--lNo5eSfO9plnTgiifwJZoprE0MgaujjF-BWOoi-TSQ5CcAu4PAauiConBUw/exec';
 
+        // ** IMPORTANT: REPLACE THIS WITH YOUR GENERATED GEMINI API KEY **
+        // ** สำคัญ: แทนที่ข้อความนี้ด้วย Gemini API Key ที่คุณสร้างขึ้นมา **
+        const GEMINI_API_KEY = 'AIzaSyDWTdhM4j2rv0Yp54EvuRCFk71MQ1VZfyI'; // <-- API Key ของคุณ
+
         // Function to show the custom modal
         function showModal(title, message) {
             document.getElementById('modalTitle').innerText = title;
@@ -408,7 +412,6 @@
 
         // Function to send data to Google Sheet
         async function sendDataToGoogleSheet(formData) {
-            // No need to check for '/dev' anymore as we expect a correct '/exec' URL
             if (!GOOGLE_APPS_SCRIPT_URL || GOOGLE_APPS_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
                 showModal('ข้อผิดพลาด', 'โปรดตั้งค่า GOOGLE_APPS_SCRIPT_URL ในโค้ด JavaScript ก่อน');
                 return;
@@ -416,7 +419,7 @@
 
             showLoading();
             try {
-                 response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+                const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors', // Required for Google Apps Script web app
                     headers: {
@@ -438,7 +441,7 @@
 
         // Function to submit the form data
         async function submitForm() {
-             formData = getFormData();
+            const formData = getFormData();
             console.log('Form Data:', formData);
             await sendDataToGoogleSheet(formData); // Send data to Google Sheet
         }
@@ -466,8 +469,14 @@
         async function processImageWithAI(base64ImageData) {
             showLoading();
             try {
+                if (!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_GENERATED_GEMINI_API_KEY_HERE') {
+                    showModal('ข้อผิดพลาด', 'โปรดใส่ Gemini API Key ของคุณในโค้ด JavaScript ก่อน');
+                    hideLoading();
+                    return;
+                }
+
                 let chatHistory = [];
-                 prompt = `Extract the following information from the image and return it as a JSON object.
+                const prompt = `Extract the following information from the image and return it as a JSON object.
                 - "productType": (array of strings, e.g., ["สินค้าสำเร็จรูป", "วัตถุดิบ"]) - based on the checked boxes. If no boxes are checked, return an empty array.
                 - "lotNo": (string) - The value next to "Lot No."
                 - "fromUnit": (string) - The value next to "จากหน่วยงาน"
@@ -483,7 +492,7 @@
 
                 chatHistory.push({ role: "user", parts: [{ text: prompt }] });
 
-                 payload = {
+                const payload = {
                     contents: [
                         {
                             role: "user",
@@ -519,17 +528,18 @@
                     }
                 };
 
-                const apiKey = "AIzaSyDWTdhM4j2rv0Yp54EvuRCFk71MQ1VZfyI"; // Canvas will automatically provide the API key
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
+                console.log('Sending request to Gemini API with payload:', payload); // Log payload
                 const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
 
+                console.log('Raw API Response object:', response); // Log raw response object
                 const result = await response.json();
-                console.log('Gemini API Response:', result);
+                console.log('Gemini API Result (parsed JSON):', result); // Log parsed JSON result
 
                 if (result.candidates && result.candidates.length > 0 &&
                     result.candidates[0].content && result.candidates[0].content.parts &&
@@ -539,7 +549,13 @@
                     populateForm(parsedData);
                     showModal('สำเร็จ!', 'ข้อมูลจากภาพถูกกรอกลงในฟอร์มแล้ว');
                 } else {
-                    showModal('ข้อผิดพลาด', 'ไม่สามารถดึงข้อมูลจากภาพได้ โปรดลองอีกครั้ง');
+                    let errorMessage = 'ไม่สามารถดึงข้อมูลจากภาพได้ โปรดลองอีกครั้ง';
+                    if (result.error && result.error.message) {
+                        errorMessage += '\nข้อผิดพลาดจาก API: ' + result.error.message;
+                    } else if (response.status) {
+                        errorMessage += `\nสถานะ HTTP: ${response.status} ${response.statusText}`;
+                    }
+                    showModal('ข้อผิดพลาด', errorMessage);
                 }
 
             } catch (error) {
