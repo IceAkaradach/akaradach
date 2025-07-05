@@ -416,7 +416,7 @@
 
             showLoading();
             try {
-                const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+                 response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors', // Required for Google Apps Script web app
                     headers: {
@@ -438,7 +438,7 @@
 
         // Function to submit the form data
         async function submitForm() {
-            const formData = getFormData();
+             formData = getFormData();
             console.log('Form Data:', formData);
             await sendDataToGoogleSheet(formData); // Send data to Google Sheet
         }
@@ -467,7 +467,7 @@
             showLoading();
             try {
                 let chatHistory = [];
-                const prompt = `Extract the following information from the image and return it as a JSON object.
+                 prompt = `Extract the following information from the image and return it as a JSON object.
                 - "productType": (array of strings, e.g., ["สินค้าสำเร็จรูป", "วัตถุดิบ"]) - based on the checked boxes. If no boxes are checked, return an empty array.
                 - "lotNo": (string) - The value next to "Lot No."
                 - "fromUnit": (string) - The value next to "จากหน่วยงาน"
@@ -483,7 +483,7 @@
 
                 chatHistory.push({ role: "user", parts: [{ text: prompt }] });
 
-                const payload = {
+                 payload = {
                     contents: [
                         {
                             role: "user",
@@ -519,7 +519,7 @@
                     }
                 };
 
-                const apiKey = ""; // Canvas will automatically provide the API key
+                const apiKey = "AIzaSyDWTdhM4j2rv0Yp54EvuRCFk71MQ1VZfyI"; // Canvas will automatically provide the API key
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
                 const response = await fetch(apiUrl, {
