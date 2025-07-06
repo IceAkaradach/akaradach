@@ -722,7 +722,8 @@
                 if (value === null || value === undefined) return '';
                 let stringValue = String(value);
                 if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
-                    return `"${stringValue.replace(/"/g, '""')}"`;
+                    // FIX: Removed the extra closing double quote here
+                    return `"${stringValue.replace(/"/g, '""')}"`; 
                 }
                 return stringValue;
             };
