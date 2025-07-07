@@ -38,8 +38,7 @@
         input[type="text"],
         input[type="number"],
         input[type="date"],
-        input[type="file"],
-        select { /* Added select to styling */
+        input[type="file"] {
             width: 100%;
             padding: 12px;
             border: 1px solid #ccc;
@@ -51,8 +50,7 @@
         input[type="text"]:focus,
         input[type="number"]:focus,
         input[type="date"]:focus,
-        input[type="file"]:focus,
-        select:focus { /* Added select to styling */
+        input[type="file"]:focus {
             border-color: #6366f1;
             box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
             outline: none;
@@ -300,37 +298,19 @@
             </div>
             <div class="form-group">
                 <label for="fromUnit">จากหน่วยงาน</label>
-                <select id="fromUnit" name="fromUnit">
-                    <option value="">-- เลือกหน่วยงาน --</option>
-                    <option value="STORE">STORE</option>
-                    <option value="CUTTING">CUTTING</option>
-                    <option value="ASSEMBLY">ASSEMBLY</option>
-                    <option value="QA">QA</option>
-                    <option value="PACKING">PACKING</option>
-                    <option value="SHIPPING">SHIPPING</option>
-                </select>
+                <input type="text" id="fromUnit" name="fromUnit" value="">
             </div>
             <div class="form-group">
                 <label for="productName">ผลิตภัณฑ์</label>
-                <input type="text" id="productName" name="productName" value="" onblur="fetchProductPartBalance()">
-                <div id="productBalanceDisplay" class="text-sm text-gray-600 mt-1"></div>
+                <input type="text" id="productName" name="productName" value="">
             </div>
             <div class="form-group">
                 <label for="toUnit">ไปหน่วยงาน</label>
-                <select id="toUnit" name="toUnit">
-                    <option value="">-- เลือกหน่วยงาน --</option>
-                    <option value="STORE">STORE</option>
-                    <option value="CUTTING">CUTTING</option>
-                    <option value="ASSEMBLY">ASSEMBLY</option>
-                    <option value="QA">QA</option>
-                    <option value="PACKING">PACKING</option>
-                    <option value="SHIPPING">SHIPPING</option>
-                </select>
+                <input type="text" id="toUnit" name="toUnit" value="">
             </div>
             <div class="form-group">
                 <label for="part">ชิ้นส่วน</label>
-                <input type="text" id="part" name="part" value="" onblur="fetchProductPartBalance()">
-                <div id="partBalanceDisplay" class="text-sm text-gray-600 mt-1"></div>
+                <input type="text" id="part" name="part" value="">
             </div>
             <div class="form-group">
                 <label for="quantity">จำนวน</label>
@@ -386,7 +366,7 @@
     <script>
         // ** IMPORTANT: THIS IS YOUR DEPLOYED GOOGLE APPS SCRIPT WEB APP URL (MUST END WITH /exec) **
         // ** สำคัญ: นี่คือ URL ของ Google Apps Script Web App ที่คุณได้ปรับใช้ (ต้องลงท้ายด้วย /exec) **
-        const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwQy6YAKv8oJipxC7J-o136tBe0VQhrJemaA56QZov4uNYhrqykerfuiXh0QCl0gkR5rA/exec';
+        const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzicq9SUOyzTjUQ5w6NOFix8HWp4LDOzJh_4xe0qgIMIBW5dPrN3R05llVlj6VPfw3e-g/exec';
 
         // ** IMPORTANT: REPLACE THIS WITH YOUR GENERATED GEMINI API KEY **
         // ** สำคัญ: แทนที่ข้อความนี้ด้วย Gemini API Key ที่คุณสร้างขึ้นมา **
@@ -419,9 +399,9 @@
             return {
                 productType: Array.from(document.querySelectorAll('input[name="productType"]:checked')).map(cb => cb.value),
                 lotNo: document.getElementById('lotNo').value,
-                fromUnit: document.getElementById('fromUnit').value, // Get value from select
+                fromUnit: document.getElementById('fromUnit').value,
                 productName: document.getElementById('productName').value,
-                toUnit: document.getElementById('toUnit').value, // Get value from select
+                toUnit: document.getElementById('toUnit').value,
                 part: document.getElementById('part').value,
                 quantity: document.getElementById('quantity').value,
                 inspectionResult: Array.from(document.querySelectorAll('input[name="inspectionResult"]:checked')).map(cb => cb.value),
@@ -441,25 +421,16 @@
             try {
                 const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
                     method: 'POST',
-                    // Removed mode: 'no-cors' to allow proper data transmission and response reading
+                    mode: 'no-cors', // Required for Google Apps Script web app
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(formData),
                 });
 
-                // Now we can check response.ok and response.json()
-                if (response.ok) {
-                    const result = await response.json();
-                    if (result.result === 'success') {
-                        showModal('ส่งข้อมูลสำเร็จ!', 'ข้อมูลถูกส่งไปยัง Google Sheet แล้ว');
-                    } else {
-                        showModal('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการส่งข้อมูลไปยัง Google Sheet: ' + (result.message || 'Unknown error.'));
-                    }
-                } else {
-                    console.error('Failed to send data to Google Sheet:', response.status, response.statusText);
-                    showModal('ข้อผิดพลาด', `เกิดข้อผิดพลาดในการส่งข้อมูลไปยัง Google Sheet: ${response.status} ${response.statusText}`);
-                }
+                // Since mode is 'no-cors', we can't check response.ok or response.json() directly.
+                // We assume success if no network error occurred.
+                showModal('ส่งข้อมูลสำเร็จ!', 'ข้อมูลถูกส่งไปยัง Google Sheet แล้ว');
             } catch (error) {
                 console.error('Error sending data to Google Sheet:', error);
                 showModal('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการส่งข้อมูลไปยัง Google Sheet: ' + error.message);
@@ -475,12 +446,12 @@
             await sendDataToGoogleSheet(formData); // Send data to Google Sheet
         }
 
-        // New function to clear form fields without showing a modal
-        function clearFormFields() {
+        // Function to reset the form fields
+        function resetForm() {
             document.getElementById('lotNo').value = '';
-            document.getElementById('fromUnit').value = ''; // Reset select to default empty option
+            document.getElementById('fromUnit').value = '';
             document.getElementById('productName').value = '';
-            document.getElementById('toUnit').value = ''; // Reset select to default empty option
+            document.getElementById('toUnit').value = '';
             document.getElementById('part').value = '';
             document.getElementById('quantity').value = '';
             document.getElementById('employeeName').value = '';
@@ -491,15 +462,7 @@
                 checkbox.checked = false;
             });
 
-            // Clear balance displays
-            document.getElementById('productBalanceDisplay').innerText = '';
-            document.getElementById('partBalanceDisplay').innerText = '';
-        }
-
-        // Function to reset the form fields (called by button click)
-        function resetForm() {
-            clearFormFields(); // Clear fields first
-            showModal('ฟอร์มถูกรีเซ็ต', 'แบบฟอร์มถูกล้างข้อมูลเรียบร้อยแล้ว!'); // Then show modal
+            showModal('ฟอร์มถูกรีเซ็ต', 'แบบฟอร์มถูกล้างข้อมูลเรียบร้อยแล้ว!');
         }
 
         // Function to process the image with Gemini API
@@ -606,9 +569,9 @@
         // Function to populate the form fields with extracted data
         function populateForm(data) {
             document.getElementById('lotNo').value = data.lotNo || '';
-            document.getElementById('fromUnit').value = data.fromUnit || ''; // Set value for select
+            document.getElementById('fromUnit').value = data.fromUnit || '';
             document.getElementById('productName').value = data.productName || '';
-            document.getElementById('toUnit').value = data.toUnit || ''; // Set value for select
+            document.getElementById('toUnit').value = data.toUnit || '';
             document.getElementById('part').value = data.part || '';
             document.getElementById('quantity').value = data.quantity || '';
             document.getElementById('employeeName').value = data.employeeName || '';
@@ -623,75 +586,6 @@
             document.querySelectorAll('input[name="inspectionResult"]').forEach(checkbox => {
                 checkbox.checked = data.inspectionResult && data.inspectionResult.includes(checkbox.value);
             });
-
-            // Update balance displays if data is available
-            document.getElementById('productBalanceDisplay').innerText = data.productBalance ? `ยอดคงเหลือผลิตภัณฑ์: ${data.productBalance}` : '';
-            document.getElementById('partBalanceDisplay').innerText = data.partBalance ? `ยอดคงเหลือชิ้นส่วน: ${data.partBalance}` : '';
-        }
-
-        // Function to fetch product and part balance from Google Sheet
-        async function fetchProductPartBalance() {
-            const productName = document.getElementById('productName').value.trim();
-            const part = document.getElementById('part').value.trim();
-
-            // Clear previous balance displays
-            document.getElementById('productBalanceDisplay').innerText = '';
-            document.getElementById('partBalanceDisplay').innerText = '';
-
-            if (!productName && !part) {
-                return; // Do nothing if both fields are empty
-            }
-
-            // Construct the URL for the Apps Script doGet endpoint
-            let fetchUrl = GOOGLE_APPS_SCRIPT_URL;
-            let params = new URLSearchParams();
-            if (productName) {
-                params.append('productName', productName);
-            }
-            if (part) {
-                params.append('part', part);
-            }
-
-            if (params.toString()) {
-                fetchUrl += '?' + params.toString();
-            }
-
-            try {
-                // Removed Content-Type header for GET request to avoid CORS preflight issues
-                const response = await fetch(fetchUrl, {
-                    method: 'GET',
-                    // headers: { // Removed headers for GET
-                    //     'Content-Type': 'application/json',
-                    // },
-                });
-
-                if (!response.ok) {
-                    console.error('Failed to fetch balance:', response.status, response.statusText);
-                    document.getElementById('productBalanceDisplay').innerText = 'ไม่พบยอดคงเหลือ';
-                    document.getElementById('partBalanceDisplay').innerText = 'ไม่พบยอดคงเหลือ';
-                    return;
-                }
-
-                const result = await response.json();
-                console.log('Balance fetch result:', result);
-
-                if (result.productBalance !== undefined && result.productBalance !== 'ไม่พบข้อมูล') {
-                    document.getElementById('productBalanceDisplay').innerText = `ยอดคงเหลือผลิตภัณฑ์: ${result.productBalance}`;
-                } else {
-                    document.getElementById('productBalanceDisplay').innerText = 'ไม่พบยอดคงเหลือผลิตภัณฑ์';
-                }
-
-                if (result.partBalance !== undefined && result.partBalance !== 'ไม่พบข้อมูล') {
-                    document.getElementById('partBalanceDisplay').innerText = `ยอดคงเหลือชิ้นส่วน: ${result.partBalance}`;
-                } else {
-                    document.getElementById('partBalanceDisplay').innerText = 'ไม่พบยอดคงเหลือชิ้นส่วน';
-                }
-
-            } catch (error) {
-                console.error('Error fetching balance:', error);
-                document.getElementById('productBalanceDisplay').innerText = 'ข้อผิดพลาดในการดึงยอดคงเหลือ';
-                document.getElementById('partBalanceDisplay').innerText = 'ข้อผิดพลาดในการดึงยอดคงเหลือ';
-            }
         }
 
         // Function to export form data to CSV
@@ -722,8 +616,7 @@
                 if (value === null || value === undefined) return '';
                 let stringValue = String(value);
                 if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
-                    // FIX: Removed the extra closing double quote here
-                    return `"${stringValue.replace(/"/g, '""')}"`; 
+                    return `"${stringValue.replace(/"/g, '""')}"`;
                 }
                 return stringValue;
             };
@@ -770,7 +663,7 @@
             });
 
             // Initial state (clearing values as they will be filled by image upload or user input)
-            clearFormFields(); // Call the new function to clear fields without modal
+            resetForm();
         });
     </script>
 </body>
